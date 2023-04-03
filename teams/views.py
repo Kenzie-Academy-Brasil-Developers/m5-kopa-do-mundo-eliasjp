@@ -45,3 +45,13 @@ class TeamView(APIView):
         teams = [model_to_dict(team) for team in get_response]
         
         return Response(teams, status.HTTP_200_OK)
+    
+class TeamIdView(APIView):
+    def delete(self, request: Request, team_id):
+        find_team = Team.objects.filter(id = team_id)
+        if not len(find_team) > 0:
+            return Response({"message": "Team not found"}, status.HTTP_404_NOT_FOUND)
+        
+        find_team.delete()
+
+        return Response(None, status.HTTP_204_NO_CONTENT)
