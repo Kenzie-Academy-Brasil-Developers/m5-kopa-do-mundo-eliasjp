@@ -47,11 +47,31 @@ class TeamView(APIView):
         return Response(teams, status.HTTP_200_OK)
     
 class TeamIdView(APIView):
+    def patch(self, request: Request, team_id):
+        find_team = Team.objects.filter(id = team_id)
+        if not len(find_team) > 0:
+                    return Response({"message": "Team not found"}, status.HTTP_404_NOT_FOUND)
+        
+        if not dict.keys(request.data):
+            return Response({"message": "No body found."}, status.HTTP_400_BAD_REQUEST)
+        
+        possible_keys = ("name", "titles", "top_scorer", "fifa_code", "first_cup")
+
+        for key in tuple(dict.keys(request.data)):
+            if key not in possible_keys:
+                request.data.pop(key)
+
+        for index, key in enumerate(request.data):
+            setattr(find_team[0], key, request.data[key])
+        updated = find_team[0].save()
+    
+        return Response(model_to_dict(find_team[0]), status.HTTP_200_OK)
+
     def delete(self, request: Request, team_id):
         find_team = Team.objects.filter(id = team_id)
         if not len(find_team) > 0:
             return Response({"message": "Team not found"}, status.HTTP_404_NOT_FOUND)
         
-        find_team.delete()
+        find_team[0].delete()
 
         return Response(None, status.HTTP_204_NO_CONTENT)
