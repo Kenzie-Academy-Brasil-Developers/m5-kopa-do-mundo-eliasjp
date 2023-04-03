@@ -39,3 +39,9 @@ class TeamView(APIView):
         translate = model_to_dict(created_item)
 
         return Response(translate, status.HTTP_201_CREATED)
+    
+    def get(self, request: Request):
+        get_response = Team.objects.all()
+        teams = [model_to_dict(team) for team in get_response]
+        
+        return Response(teams, status.HTTP_200_OK)
