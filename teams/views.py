@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.forms.models import model_to_dict
 from rest_framework.views import APIView, Response, Request, status
 from teams.models import Team
+from teams.utils import data_processing
+from teams.exceptions import ImpossibleTitlesError, InvalidYearCupError, NegativeTitlesError
 
 # Create your views here.
 class TeamView(APIView):
@@ -17,6 +19,11 @@ class TeamView(APIView):
                 return Response({"error": f"Missing {must_key}"}, status.HTTP_400_BAD_REQUEST)
 
         teams = Team.objects.filter(fifa_code = request.data["fifa_code"])
+
+        try:
+            data_processing(request.data)
+        except (ImpossibleTitlesError, InvalidYearCupError, NegativeTitlesError) as error:
+            return Response({"error": error.message}, status.HTTP_400_BAD_REQUEST)
 
         if len(teams) > 0:
             return Response({"msg": f"Fifa code already exists."}, status.HTTP_409_CONFLICT)
