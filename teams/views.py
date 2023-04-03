@@ -63,7 +63,7 @@ class TeamIdView(APIView):
 
         for index, key in enumerate(request.data):
             setattr(find_team[0], key, request.data[key])
-        updated = find_team[0].save()
+        find_team[0].save()
     
         return Response(model_to_dict(find_team[0]), status.HTTP_200_OK)
 
@@ -75,3 +75,10 @@ class TeamIdView(APIView):
         find_team[0].delete()
 
         return Response(None, status.HTTP_204_NO_CONTENT)
+    
+    def get(self, request: Request, team_id):
+        find_team = Team.objects.filter(id = team_id)
+        if not len(find_team) > 0:
+            return Response({"message": "Team not found"}, status.HTTP_404_NOT_FOUND)
+        
+        return Response(model_to_dict(find_team[0]), status.HTTP_200_OK)
