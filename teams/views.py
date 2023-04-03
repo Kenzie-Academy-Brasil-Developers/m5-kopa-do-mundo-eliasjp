@@ -2,13 +2,11 @@ from django.shortcuts import render
 from django.forms.models import model_to_dict
 from rest_framework.views import APIView, Response, Request, status
 from teams.models import Team
-import datetime
 
 # Create your views here.
 class TeamView(APIView):
     def post(self, request: Request):
         must_contain_keys = ("name", "titles", "top_scorer", "fifa_code", "first_cup")
-        all_cups = (1930, 1934, 1938, 1950, 1954, 1958, 1962, 1966, 1970, 1974, 1978, 1982, 1986, 1990, 1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022)
 
         for key in tuple(dict.keys(request.data)):
             if key not in must_contain_keys:
@@ -19,18 +17,6 @@ class TeamView(APIView):
                 return Response({"error": f"Missing {must_key}"}, status.HTTP_400_BAD_REQUEST)
 
         teams = Team.objects.filter(fifa_code = request.data["fifa_code"])
-
-        if int(request.data["first_cup"].split("-")[0]) < 1930:
-            return Response({"error": "there was no world cup this year"}, status.HTTP_400_BAD_REQUEST)
-
-        if int(request.data["first_cup"].split("-")[0]) not in all_cups:
-            return Response({"error": "there was no world cup this year"}, status.HTTP_400_BAD_REQUEST)
-        
-        if len(all_cups) - all_cups.index(int(request.data["first_cup"].split("-")[0])) < request.data["titles"]:
-            return Response({"error": "impossible to have more titles than disputed cups"}, status.HTTP_400_BAD_REQUEST)
-
-        if request.data["titles"] < 0:
-            return Response({"error": 'titles cannot be negative'}, status.HTTP_400_BAD_REQUEST)
 
         if len(teams) > 0:
             return Response({"msg": f"Fifa code already exists."}, status.HTTP_409_CONFLICT)
